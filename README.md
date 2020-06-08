@@ -1,2 +1,2 @@
 # C-Integration
-A program that can parse and integrate polynomials
+The goal of this project was to create a program entirely in C that can parse polynomials and evaluate definite integrals

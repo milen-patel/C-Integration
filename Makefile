@@ -10,6 +10,10 @@ main.o : src/main.c
 clean:
 	rm ./build/*
 
-.PHONE: run
+.PHONY: run
 run:
 	./build/cIntegration
+
+.PHONY: leak-test
+leak-test:
+	valgrind ./build/cIntegration

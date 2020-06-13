@@ -1,7 +1,9 @@
 #include "Integrate.h"
+#include "CharItr.h"
+#include "Scanner.h"
 #include <stdio.h>
 
-IntegrateRequest constructIntegrationRequest(Scanner equation, int lowerBound, int upperBound, int numPartitions) {
+IntegrateRequest constructIntegrationRequest(Str equation, float lowerBound, float upperBound, int numPartitions) {
 	IntegrateRequest rval = {
 		lowerBound,
 		upperBound,
@@ -11,39 +13,74 @@ IntegrateRequest constructIntegrationRequest(Scanner equation, int lowerBound, i
 	return rval;
 }
 
-void handleIntegrationRequest(IntegrateRequest *req) {
-	printf("The Following Request Has Been Made to Integrate from %d to %d\n", req->lowerBound, req->upperBound);
-	Scanner scanner = req->equationScanner;
-    while (Scanner_has_next(&scanner)) {
-        Token next = Scanner_next(&scanner);
-        switch (next.type) {
-            case END_TOKEN: 
-                printf("END\n");
-                break;
-            case WORD_TOKEN:
-                printf("WORD(%s)\n", Str_cstr(&next.lexeme));
-                break;
-            case PIPE_TOKEN:
-                printf("PIPE\n");
-                break;
-			case ADD_TOKEN:
-				printf("ADDITION\n");
-				break;
-			case SUBTRACT_TOKEN:
-				printf("SUBTRACTION\n");
-				break;
-			case VARIABLE_TOKEN:
-				printf("VARIABLE(%s)\n", Str_cstr(&next.lexeme));
-				break;
-			case EXPONENT_TOKEN:
-				printf("EXPONENT(%s)\n", Str_cstr(&next.lexeme));
-				break;
-			case NUMERIC_TOKEN:
-				printf("NUMBER(%s)\n", Str_cstr(&next.lexeme));
-				break;
-        }
-        Str_drop(&next.lexeme);
-    }
+float handleIntegrationRequest(IntegrateRequest *req) {
+	/* Let the user know what we are doing */
+	printf("The Following Request Has Been Made to Integrate from %f to %f\n", req->lowerBound, req->upperBound);
+
+	/* Verify Input */
+	if (validateIntegrationRequest(req) == ZERO_PARTITIONS) {
+		return 0.00;
+	} else if (validateIntegrationRequest(req) == SAME_BOUNDS) {
+		return 0.00;
+	} else if (validateIntegrationRequest(req) != VALID) {
+		/* TODO: Handle bad input */
+		return 0.00; 
+	}
+
+	/* Calculate box width */
+	float boxWidth = (req->upperBound - req->lowerBound)/(req->numPartitions);
+	float integrationTotal = 0;
+
+	/* Start calculating and adding areas */
+	for (int i=0; i<req->numPartitions; i++) {
+		/* Construct a iterator for the equation Str */
+		CharItr itr = CharItr_of_Str(&req->equationStr);
+		Scanner scanner = Scanner_value(itr);
+		/* Create String to hold equation with subsituted values */
+		Str numericEquation = Str_value(1);
+		float xVal = i*boxWidth;
+		while(Scanner_has_next(&scanner)) {
+			Token nextToken = Scanner_next(&scanner);
+			switch (nextToken.type) {
+				case END_TOKEN:
+					break;
+				case NUMERIC_TOKEN:
+					Str_append(&numericEquation, Str_cstr(&nextToken.lexeme));
+					break;
+				case ADD_TOKEN:
+					Str_append(&numericEquation, "+");
+					break;
+				case SUBTRACT_TOKEN:
+					Str_append(&numericEquation, "-");
+					break;
+				case VARIABLE_TOKEN:
+					{		
+					/* Want to convert a float to string before subsituting */
+					char strval[20];
+					sprintf(strval, "%f", xVal);
+					Str_append(&numericEquation, "(");
+					Str_append(&numericEquation, strval);
+					Str_append(&numericEquation, ")");
+					break;
+					}
+				case EXPONENT_TOKEN:
+					{
+					Str_append(&numericEquation, "^(");
+					Str_append(&numericEquation, Str_cstr(&nextToken.lexeme));
+					Str_append(&numericEquation, ")");
+					break;
+					}
+				case WORD_TOKEN:
+					break;
+				default:
+					break;
+			}
+			Str_drop(&nextToken.lexeme);
+		}
+		printf("The equation is: %s\n", Str_cstr(&numericEquation));
+		Str_drop(&numericEquation);
+	}
+	return 0.00;
 }
 
 RequestValidationResult validateIntegrationRequest(IntegrateRequest *req) {

@@ -1,18 +1,18 @@
 #ifndef INTEGRATE_H
 #define INTEGRATE_H
 
-#include "Scanner.h"
+#include "Str.h"
 
 typedef struct IntegrateRequest {
-	int lowerBound;
-	int upperBound;
+	float lowerBound;
+	float upperBound;
 	int numPartitions;
-	Scanner equationScanner;
+	Str equationStr;
 } IntegrateRequest;
 
-IntegrateRequest constructIntegrationRequest(Scanner equation, int lowerBound, int upperBound, int numPartitions);
+IntegrateRequest constructIntegrationRequest(Str equation, float lowerBound, float upperBound, int numPartitions);
 
-void handleIntegrationRequest(IntegrateRequest *req);
+float handleIntegrationRequest(IntegrateRequest *req);
 
 typedef enum RequestValidationResult {
 	VALID = 0,

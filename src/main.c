@@ -12,7 +12,7 @@
 #define BAD_PARTITION_COUNT 3
 #define INTEGRATED_SUCCESSFULLY 0
 
-void handle(Scanner scanner, int first, int second, int n);
+void handle(Str equation, float first, float second, int n);
 
 int main()
 {
@@ -35,9 +35,9 @@ int main()
 
 
 	/* Prompt User for bounds */
-	int boundLow, boundHigh;
+	float boundLow, boundHigh;
 	printf("Enter Lower Bound: ");
-	if (scanf("%d", &boundLow) != 1) {
+	if (scanf("%f", &boundLow) != 1) {
 		/* We failed to read in an integer */
 		Str_drop(&lineString);
 		free(line);
@@ -45,7 +45,7 @@ int main()
 		return BAD_INTEGRATION_BOUNDS;
 	}
 	printf("Enter Upper Bound: ");
-	if (scanf("%d", &boundHigh) != 1) {
+	if (scanf("%f", &boundHigh) != 1) {
 		/* We failed to read in an integer */
 		Str_drop(&lineString);
 		free(line);
@@ -63,8 +63,7 @@ int main()
 		printf("ABORT: Unable to read number of partitions\n");
 		return BAD_PARTITION_COUNT;
 	}
-	Scanner eqnScanner = Scanner_value(CharItr_of_Str((&lineString)));
-	handle(eqnScanner, boundLow, boundHigh, n);
+	handle(lineString, boundLow, boundHigh, n);
 
 	/* Free the pointers and drop the string*/
 	free(line);
@@ -73,8 +72,8 @@ int main()
     return INTEGRATED_SUCCESSFULLY;
 }
 
-void handle(Scanner scanner, int first, int second, int n) {
+void handle(Str eqn, float first, float second, int n) {
 	/* Construct integration request */
-	IntegrateRequest currentRequest = constructIntegrationRequest(scanner, first, second, n);
+	IntegrateRequest currentRequest = constructIntegrationRequest(eqn, first, second, n);
 	handleIntegrationRequest(&currentRequest);
 }

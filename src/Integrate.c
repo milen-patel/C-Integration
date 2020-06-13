@@ -1,10 +1,11 @@
 #include "Integrate.h"
 #include <stdio.h>
 
-IntegrateRequest constructIntegrationRequest(Scanner equation, int lowerBound, int upperBound) {
+IntegrateRequest constructIntegrationRequest(Scanner equation, int lowerBound, int upperBound, int numPartitions) {
 	IntegrateRequest rval = {
 		lowerBound,
 		upperBound,
+		numPartitions,
 		equation
 	};
 	return rval;
@@ -43,4 +44,20 @@ void handleIntegrationRequest(IntegrateRequest *req) {
         }
         Str_drop(&next.lexeme);
     }
+}
+
+RequestValidationResult validateIntegrationRequest(IntegrateRequest *req) {
+	if (req->lowerBound > req->upperBound) {
+		return DECREASING_BOUNDS;
+	}
+	if (req->lowerBound == req->upperBound) {
+		return SAME_BOUNDS;	
+	}
+	if (req->numPartitions == 0) {
+		return ZERO_PARTITIONS;
+	}
+	if (req->numPartitions < 0) {
+		return INVALID_PARTITION_COUNT;
+	}
+	return VALID;
 }

@@ -9,9 +9,10 @@
 
 #define BAD_EQUATION_CODE 1
 #define BAD_INTEGRATION_BOUNDS 2
+#define BAD_PARTITION_COUNT 3
 #define INTEGRATED_SUCCESSFULLY 0
 
-void handle(Scanner scanner, int first, int second);
+void handle(Scanner scanner, int first, int second, int n);
 
 int main()
 {
@@ -52,8 +53,18 @@ int main()
 		return BAD_INTEGRATION_BOUNDS;
 	}
 	
+	/* Prompt User for number of rectangles to use */
+	int n;
+	printf("Enter Number of Partitions: ");
+	if (scanf("%d", &n) != 1) {
+		/* We failed to read in an integer */
+		Str_drop(&lineString);
+		free(line);
+		printf("ABORT: Unable to read number of partitions\n");
+		return BAD_PARTITION_COUNT;
+	}
 	Scanner eqnScanner = Scanner_value(CharItr_of_Str((&lineString)));
-	handle(eqnScanner, boundLow, boundHigh);
+	handle(eqnScanner, boundLow, boundHigh, n);
 
 	/* Free the pointers and drop the string*/
 	free(line);
@@ -62,8 +73,8 @@ int main()
     return INTEGRATED_SUCCESSFULLY;
 }
 
-void handle(Scanner scanner, int first, int second) {
+void handle(Scanner scanner, int first, int second, int n) {
 	/* Construct integration request */
-	IntegrateRequest currentRequest = constructIntegrationRequest(scanner, first, second);
+	IntegrateRequest currentRequest = constructIntegrationRequest(scanner, first, second, n);
 	handleIntegrationRequest(&currentRequest);
 }

@@ -1,6 +1,7 @@
 #include "Integrate.h"
 #include "CharItr.h"
 #include "Scanner.h"
+#include "tinyexpr.h"
 #include <stdio.h>
 
 IntegrateRequest constructIntegrationRequest(Str equation, float lowerBound, float upperBound, int numPartitions) {
@@ -58,7 +59,7 @@ float handleIntegrationRequest(IntegrateRequest *req) {
 					/* Want to convert a float to string before subsituting */
 					char strval[20];
 					sprintf(strval, "%f", xVal);
-					Str_append(&numericEquation, "(");
+					Str_append(&numericEquation, "*(");
 					Str_append(&numericEquation, strval);
 					Str_append(&numericEquation, ")");
 					break;
@@ -78,8 +79,11 @@ float handleIntegrationRequest(IntegrateRequest *req) {
 			Str_drop(&nextToken.lexeme);
 		}
 		printf("The equation is: %s\n", Str_cstr(&numericEquation));
+		printf("----> %f\n", te_interp(Str_cstr(&numericEquation), 0));
+		integrationTotal += boxWidth*te_interp(Str_cstr(&numericEquation), 0);
 		Str_drop(&numericEquation);
 	}
+	printf("TOTAL: %f\n", integrationTotal);
 	return 0.00;
 }
 

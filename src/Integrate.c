@@ -3,6 +3,7 @@
 #include "Scanner.h"
 #include "tinyexpr.h"
 #include <stdio.h>
+#include <ctype.h>
 
 IntegrateRequest constructIntegrationRequest(Str equation, float lowerBound, float upperBound, int numPartitions) {
 	IntegrateRequest rval = {
@@ -39,7 +40,7 @@ float handleIntegrationRequest(IntegrateRequest *req) {
 		Scanner scanner = Scanner_value(itr);
 		/* Create String to hold equation with subsituted values */
 		Str numericEquation = Str_value(1);
-		float xVal = i*boxWidth;
+		float xVal = i*boxWidth + req->lowerBound;
 		while(Scanner_has_next(&scanner)) {
 			Token nextToken = Scanner_next(&scanner);
 			switch (nextToken.type) {
@@ -56,10 +57,14 @@ float handleIntegrationRequest(IntegrateRequest *req) {
 					break;
 				case VARIABLE_TOKEN:
 					{		
+					/* If the previous term is a coefficient, add a * */
+					if (Str_length(&numericEquation)>0 && isdigit(*Str_ref(&numericEquation, Str_length(&numericEquation)-1))) {
+						Str_append(&numericEquation, "*");
+					}
 					/* Want to convert a float to string before subsituting */
 					char strval[20];
 					sprintf(strval, "%f", xVal);
-					Str_append(&numericEquation, "*(");
+					Str_append(&numericEquation, "(");
 					Str_append(&numericEquation, strval);
 					Str_append(&numericEquation, ")");
 					break;
@@ -78,8 +83,8 @@ float handleIntegrationRequest(IntegrateRequest *req) {
 			}
 			Str_drop(&nextToken.lexeme);
 		}
-		printf("The equation is: %s\n", Str_cstr(&numericEquation));
-		printf("----> %f\n", te_interp(Str_cstr(&numericEquation), 0));
+		//printf("The equation is: %s\n", Str_cstr(&numericEquation));
+		//printf("----> %f\n", te_interp(Str_cstr(&numericEquation), 0));
 		integrationTotal += boxWidth*te_interp(Str_cstr(&numericEquation), 0);
 		Str_drop(&numericEquation);
 	}

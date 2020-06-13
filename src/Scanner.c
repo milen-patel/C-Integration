@@ -144,7 +144,7 @@ static void fillnextPos(Scanner *self) {
 			self->next = next;
 			return;
 		} else if (!isdigit(CharItr_peek(&self->char_itr))) {
-			/* TODO: Design chocie about handling bad input */
+			/* TODO: Design chocie about handling bad input, causes leak  */
 	        Token next;
 			next.type = END_TOKEN;
 			self->next = next;

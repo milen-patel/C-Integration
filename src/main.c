@@ -20,6 +20,7 @@ void print(Scanner scanner);
 
 int main()
 {
+	printf("Welcome to C-Integrate, this program was written by Milen Patel\n");
     Str line = Str_value(BUFF_SIZE);
     while (read(&line, stdin)) {
         print(eval(&line));
@@ -29,7 +30,8 @@ int main()
 }
 
 size_t read(Str *line, FILE *stream) {
-    printf("scanner> ");
+	printf("Please enter a polynomial on the next line\n");
+	printf("Equation:");
 
     // Clear Str contents.
     Str_splice(line, 0, Str_length(line), NULL, 0);

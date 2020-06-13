@@ -1,28 +1,83 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "sds.h"
+#include <string.h>
 
-#define BAD_EQUATION_CODE 1
-#define INTEGRATED_SUCCESSFULLY 0
+#include "Str.h"
+#include "Scanner.h"
 
-int main() {
-	/* Introduce program and prompt for equation */
-	printf("Welcome to C-Integrate, this prorgram was written by Milen Patel\n");
-	printf("Please enter a polynomial on the next line\n");
-	printf("Equation:");
+#define BUFF_SIZE 80 
 
-	char *line = NULL;
-	size_t size;
-	
-	/* Use getline() to read in equation */
-	if (getline(&line, &size, stdin) == -1) {
-		printf("ERROR: No equation was entered!");
-		return BAD_EQUATION_CODE;
-	} else {
-		printf("Parsing the Equation: %s", line);
-	}
+/**
+ * This program reads an input line from stdin and prints textual
+ * representations of the tokens scanned from lines of input.
+ */
 
-	/* Free the pointers */
-	free(line);
-	return INTEGRATED_SUCCESSFULLY;
+// These three functions provide the basis of a REPL:
+// Read-Evaluate-Print-Loop
+size_t read(Str *line, FILE *stream);
+Scanner eval(Str *input);
+void print(Scanner scanner);
+
+int main()
+{
+    Str line = Str_value(BUFF_SIZE);
+    while (read(&line, stdin)) {
+        print(eval(&line));
+    }
+    Str_drop(&line);
+    return EXIT_SUCCESS;
+}
+
+size_t read(Str *line, FILE *stream) {
+    printf("scanner> ");
+
+    // Clear Str contents.
+    Str_splice(line, 0, Str_length(line), NULL, 0);
+
+    static char buffer[BUFF_SIZE];
+    while (fgets(buffer, BUFF_SIZE, stream) != NULL) {
+        Str_append(line, buffer);
+        if (strchr(buffer, '\n') != NULL) {
+            break;
+        }
+    }
+
+    return Str_length(line);
+}
+
+Scanner eval(Str *line) {
+    return Scanner_value(CharItr_of_Str(line));
+}
+
+void print(Scanner scanner) {
+    while (Scanner_has_next(&scanner)) {
+        Token next = Scanner_next(&scanner);
+        switch (next.type) {
+            case END_TOKEN: 
+                printf("END\n");
+                break;
+            case WORD_TOKEN:
+                printf("WORD(%s)\n", Str_cstr(&next.lexeme));
+                break;
+            case PIPE_TOKEN:
+                printf("PIPE\n");
+                break;
+			case ADD_TOKEN:
+				printf("ADDITION\n");
+				break;
+			case SUBTRACT_TOKEN:
+				printf("SUBTRACTION\n");
+				break;
+			case VARIABLE_TOKEN:
+				printf("VARIABLE(%s)\n", Str_cstr(&next.lexeme));
+				break;
+			case EXPONENT_TOKEN:
+				printf("EXPONENT(%s)\n", Str_cstr(&next.lexeme));
+				break;
+			case NUMERIC_TOKEN:
+				printf("NUMBER(%s)\n", Str_cstr(&next.lexeme));
+				break;
+        }
+        Str_drop(&next.lexeme);
+    }
 }

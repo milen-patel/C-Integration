@@ -4,82 +4,66 @@
 
 #include "Str.h"
 #include "Scanner.h"
+#include "Integrate.h"
 
-#define BUFF_SIZE 80 
 
-/**
- * This program reads an input line from stdin and prints textual
- * representations of the tokens scanned from lines of input.
- */
+#define BAD_EQUATION_CODE 1
+#define BAD_INTEGRATION_BOUNDS 2
+#define INTEGRATED_SUCCESSFULLY 0
 
-// These three functions provide the basis of a REPL:
-// Read-Evaluate-Print-Loop
-size_t read(Str *line, FILE *stream);
-Scanner eval(Str *input);
-void print(Scanner scanner);
+void handle(Scanner scanner, int first, int second);
 
 int main()
 {
 	printf("Welcome to C-Integrate, this program was written by Milen Patel\n");
-    Str line = Str_value(BUFF_SIZE);
-    while (read(&line, stdin)) {
-        print(eval(&line));
-    }
-    Str_drop(&line);
-    return EXIT_SUCCESS;
-}
-
-size_t read(Str *line, FILE *stream) {
 	printf("Please enter a polynomial on the next line\n");
 	printf("Equation:");
 
-    // Clear Str contents.
-    Str_splice(line, 0, Str_length(line), NULL, 0);
+	char *line = NULL;
+	size_t size;
 
-    static char buffer[BUFF_SIZE];
-    while (fgets(buffer, BUFF_SIZE, stream) != NULL) {
-        Str_append(line, buffer);
-        if (strchr(buffer, '\n') != NULL) {
-            break;
-        }
-    }
+	/* Use getline() to read in equation */
+	if (getline(&line, &size, stdin) == -1) {
+		printf("ERROR: No equation was entered!");
+		return BAD_EQUATION_CODE;
+	} else {
+		printf("Parsing the Equation: %s", line);
+	}
+	line[size-1] = '\0';
+	Str lineString = Str_from(line);
 
-    return Str_length(line);
+
+	/* Prompt User for bounds */
+	int boundLow, boundHigh;
+	printf("Enter Lower Bound: ");
+	if (scanf("%d", &boundLow) != 1) {
+		/* We failed to read in an integer */
+		Str_drop(&lineString);
+		free(line);
+		printf("ABORT: Bad Lower Integration Bounds\n");
+		return BAD_INTEGRATION_BOUNDS;
+	}
+	printf("Enter Upper Bound: ");
+	if (scanf("%d", &boundHigh) != 1) {
+		/* We failed to read in an integer */
+		Str_drop(&lineString);
+		free(line);
+		printf("ABORT: Bad Upper Integration Bounds\n");
+		return BAD_INTEGRATION_BOUNDS;
+	}
+	
+	Scanner eqnScanner = Scanner_value(CharItr_of_Str((&lineString)));
+	handle(eqnScanner, boundLow, boundHigh);
+
+	/* Free the pointers and drop the string*/
+	free(line);
+	Str_drop(&lineString);
+
+    return INTEGRATED_SUCCESSFULLY;
 }
 
-Scanner eval(Str *line) {
-    return Scanner_value(CharItr_of_Str(line));
-}
-
-void print(Scanner scanner) {
-    while (Scanner_has_next(&scanner)) {
-        Token next = Scanner_next(&scanner);
-        switch (next.type) {
-            case END_TOKEN: 
-                printf("END\n");
-                break;
-            case WORD_TOKEN:
-                printf("WORD(%s)\n", Str_cstr(&next.lexeme));
-                break;
-            case PIPE_TOKEN:
-                printf("PIPE\n");
-                break;
-			case ADD_TOKEN:
-				printf("ADDITION\n");
-				break;
-			case SUBTRACT_TOKEN:
-				printf("SUBTRACTION\n");
-				break;
-			case VARIABLE_TOKEN:
-				printf("VARIABLE(%s)\n", Str_cstr(&next.lexeme));
-				break;
-			case EXPONENT_TOKEN:
-				printf("EXPONENT(%s)\n", Str_cstr(&next.lexeme));
-				break;
-			case NUMERIC_TOKEN:
-				printf("NUMBER(%s)\n", Str_cstr(&next.lexeme));
-				break;
-        }
-        Str_drop(&next.lexeme);
-    }
+void handle(Scanner scanner, int first, int second) {
+	/* Construct integration request */
+	IntegrateRequest currentRequest = constructIntegrationRequest(scanner, first, second);
+	handleIntegrationRequest(&currentRequest);
 }

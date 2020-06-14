@@ -1,5 +1,5 @@
-all : main.o Str.o Vec.o Scanner.o CharItr.o Guards.o Integrate.o tinyExpr.o
-	gcc build/main.o build/Str.o build/Vec.o build/Scanner.o build/CharItr.o build/Guards.o build/Integrate.o build/tinyExpr.o -o cIntegration -lm
+all : main.o Str.o Vec.o Scanner.o CharItr.o Guards.o Integrate.o 
+	gcc build/main.o build/Str.o build/Vec.o build/Scanner.o build/CharItr.o build/Guards.o build/Integrate.o -o cIntegration -lm
 	mv cIntegration ./build
 
 main.o : src/main.c
@@ -29,10 +29,6 @@ Guards.o : src/Guards.c
 Integrate.o : src/Integrate.c
 	gcc -c -I include/ src/Integrate.c
 	mv Integrate.o ./build/
-
-tinyExpr.o : src/tinyexpr.c
-	gcc -c -I include/ src/tinyexpr.c -lm
-	mv tinyexpr.o ./build/
 
 .PHONY: clean
 clean:

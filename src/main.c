@@ -6,13 +6,12 @@
 #include "Scanner.h"
 #include "Integrate.h"
 
-
 #define BAD_EQUATION_CODE 1
 #define BAD_INTEGRATION_BOUNDS 2
 #define BAD_PARTITION_COUNT 3
 #define INTEGRATED_SUCCESSFULLY 0
 
-void handle(Str equation, float first, float second, int n);
+void handle(Str equation, float first, float second, int n, bool showOuput);
 
 int main()
 {
@@ -27,9 +26,8 @@ int main()
 	if (getline(&line, &size, stdin) == -1) {
 		printf("ERROR: No equation was entered!");
 		return BAD_EQUATION_CODE;
-	} else {
-		printf("Parsing the Equation: %s", line);
 	}
+	
 	line[size-1] = '\0';
 	Str lineString = Str_from(line);
 
@@ -63,8 +61,24 @@ int main()
 		printf("ABORT: Unable to read number of partitions\n");
 		return BAD_PARTITION_COUNT;
 	}
-	handle(lineString, boundLow, boundHigh, n);
 
+	/* Prompt user for output logging */
+	char showOutput;
+	bool showOutputBool;
+	printf("Show Output? (y/n): ");
+	if (scanf(" %c", &showOutput) != 1) {
+		/* Don't terminate the program, just dont show output */
+		showOutputBool=false;
+	}
+	if (showOutput == 'y') {
+		showOutputBool = true;
+	} else {
+		showOutputBool = false;
+	}
+
+	/* Compute integral */
+	handle(lineString, boundLow, boundHigh, n, showOutputBool);
+	
 	/* Free the pointers and drop the string*/
 	free(line);
 	Str_drop(&lineString);
@@ -72,8 +86,8 @@ int main()
     return INTEGRATED_SUCCESSFULLY;
 }
 
-void handle(Str eqn, float first, float second, int n) {
+void handle(Str eqn, float first, float second, int n, bool showOutput) {
 	/* Construct integration request */
-	IntegrateRequest currentRequest = constructIntegrationRequest(eqn, first, second, n);
+	IntegrateRequest currentRequest = constructIntegrationRequest(eqn, first, second, n, showOutput);
 	handleIntegrationRequest(&currentRequest);
 }

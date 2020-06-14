@@ -8,11 +8,12 @@ typedef struct IntegrateRequest {
 	float upperBound;
 	int numPartitions;
 	Str equationStr;
+	bool showOutput;
 } IntegrateRequest;
 
-IntegrateRequest constructIntegrationRequest(Str equation, float lowerBound, float upperBound, int numPartitions);
+IntegrateRequest constructIntegrationRequest(Str equation, float lowerBound, float upperBound, int numPartitions, bool showOutput);
 
-float handleIntegrationRequest(IntegrateRequest *req);
+void handleIntegrationRequest(IntegrateRequest *req);
 
 typedef enum RequestValidationResult {
 	VALID = 0,
@@ -20,6 +21,7 @@ typedef enum RequestValidationResult {
 	SAME_BOUNDS = 2,
 	INVALID_PARTITION_COUNT = 3,
 	ZERO_PARTITIONS = 4,
+	NEGATIVE_BOUNDS = 5,
 } RequestValidationResult;
 
 RequestValidationResult validateIntegrationRequest(IntegrateRequest *req);

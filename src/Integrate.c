@@ -1,7 +1,6 @@
 #include "Integrate.h"
 #include "CharItr.h"
 #include "Scanner.h"
-#include "tinyexpr.h"
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
@@ -106,9 +105,8 @@ void handleIntegrationRequest(IntegrateRequest *req) {
 
 		/* If the user asks to show output, then display it after each rectangle */
 		if (req->showOutput) {
-			printf("The equation is: %s\n", Str_cstr(&numericEquation));
-			printf("----> %f\n", te_interp(Str_cstr(&numericEquation), 0));
-			printf("----> %f\n", equationToFloat(numericEquation));
+			printf("The equation of the current box is: %s\n", Str_cstr(&numericEquation));
+			printf("= %f\n", equationToFloat(numericEquation));
 		}
 
 		/* Add the current rectangle to the total integral value and drop the string */

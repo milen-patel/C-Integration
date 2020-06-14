@@ -8,8 +8,8 @@
 /** Token Definitions */
 
 typedef enum TokenType {
-    END_TOKEN = -1,
-    WORD_TOKEN = 0,
+	END_TOKEN = -1,
+	WORD_TOKEN = 0,
 	ADD_TOKEN = 2,
 	SUBTRACT_TOKEN = 3,
 	VARIABLE_TOKEN = 4,

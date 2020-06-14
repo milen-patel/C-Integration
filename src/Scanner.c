@@ -168,8 +168,8 @@ static void fillnextPos(Scanner *self) {
 
     /* If we make it here, then we have a word to read */
     Str buildingWord = Str_value(1025);
-    while ((CharItr_has_next(&self->char_itr)) && (CharItr_peek(&self->char_itr) != '|')) {
-        if (((CharItr_peek(&self->char_itr)) == '|') | ((CharItr_peek(&self->char_itr)) == '\0')) {
+    while ((CharItr_has_next(&self->char_itr))) {
+        if ((CharItr_peek(&self->char_itr)) == '\0') {
             break;
         }
 

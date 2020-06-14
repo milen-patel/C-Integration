@@ -18,23 +18,27 @@ IntegrateRequest constructIntegrationRequest(Str equation, float lowerBound, flo
 }
 
 void handleIntegrationRequest(IntegrateRequest *req) {
-	/* Let the user know what we are doing */
-	printf("The Following Request Has Been Made to Integrate from %f to %f\n", req->lowerBound, req->upperBound);
-
 	/* Verify Input */
-	if (validateIntegrationRequest(req) == ZERO_PARTITIONS) {
+	RequestValidationResult res = validateIntegrationRequest(req);
+	if (res == ZERO_PARTITIONS) {
 		printf("TOTAL: 0\n");
 		return; 
-	} else if (validateIntegrationRequest(req) == SAME_BOUNDS) {
+	} else if (res == SAME_BOUNDS) {
 		printf("TOTAL: 0\n");
 		return; 
-	} else if (validateIntegrationRequest(req) != VALID) {
-		printf("Unable to integrate due to invalid input!\n");
-		return; 
-	} else if (validateIntegrationRequest(req) == NEGATIVE_BOUNDS) {
+	} else if (res == NEGATIVE_BOUNDS) {
 		printf("Unable to integrate with negative bounds!\n");
 		return;
+	} else if (res == BAD_EQUATION) {
+		printf("Currently unable to parse equations of this type!\n");
+		return;
+	} else if (res != VALID) {
+		printf("Unable to integrate due to invalid input!\n");
+		return; 
 	}
+
+	/* Let the user know what we are doing */
+	printf("The Following Request Has Been Made to Integrate from %f to %f\n", req->lowerBound, req->upperBound);
 
 	/* For large partition values, notify the user */
 	if (req->numPartitions > 1500) {
@@ -140,7 +144,17 @@ RequestValidationResult validateIntegrationRequest(IntegrateRequest *req) {
 	}
 
 	/* Read the equation itself */
+		CharItr itr = CharItr_of_Str(&req->equationStr);
+		Scanner scanner = Scanner_value(itr);
+		while(Scanner_has_next(&scanner)) {
+			Token nextToken = Scanner_next(&scanner);
+			switch (nextToken.type) {
+				case WORD_TOKEN:
+					return BAD_EQUATION;
+				default:
+					break;
+			}
+		}
 
 	return VALID;
 }
-

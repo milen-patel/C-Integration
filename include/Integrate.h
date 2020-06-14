@@ -22,6 +22,7 @@ typedef enum RequestValidationResult {
 	INVALID_PARTITION_COUNT = 3,
 	ZERO_PARTITIONS = 4,
 	NEGATIVE_BOUNDS = 5,
+	BAD_EQUATION = 6,
 } RequestValidationResult;
 
 RequestValidationResult validateIntegrationRequest(IntegrateRequest *req);

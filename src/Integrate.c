@@ -112,7 +112,7 @@ void handleIntegrationRequest(IntegrateRequest *req) {
 		}
 
 		/* Add the current rectangle to the total integral value and drop the string */
-		integrationTotal += boxWidth*te_interp(Str_cstr(&numericEquation), 0);
+		integrationTotal += boxWidth*equationToFloat(numericEquation);
 		Str_drop(&numericEquation);
 	}
 	printf("TOTAL: %f\n", integrationTotal);
@@ -134,6 +134,9 @@ RequestValidationResult validateIntegrationRequest(IntegrateRequest *req) {
 	if (req->lowerBound < 0 || req->upperBound < 0) {
 		return NEGATIVE_BOUNDS;
 	}
+
+	/* Read the equation itself */
+
 	return VALID;
 }
 
@@ -194,10 +197,7 @@ float parseNum(CharItr *itr) {
 		}
 
 		rVal+=decimalLiteral;
-
-	
-	return rVal;
-
+		return rVal;
 }
 
 float parseParenthesis(CharItr *itr) {
@@ -242,7 +242,7 @@ float parseExponent(CharItr *itr, float base) {
 	}
 
 	float exp = parseParenthesis(itr);
-	printf("Parse exp yeidling base %f with power %f\n", base, exp);
+	//printf("Parse exp yeidling base %f with power %f\n", base, exp);
 	return powf(base, exp);
 
 }
@@ -260,11 +260,11 @@ float equationToFloat(Str equation) {
 			float val = parseNum(&itr);
 			if (!CharItr_has_next(&itr)) {
 				runningTotal+=val;
-				printf("(0) Adding %f to %f\n",val,runningTotal);
+				//printf("(0) Adding %f to %f\n",val,runningTotal);
 				return runningTotal;
 			} else if (CharItr_peek(&itr) == '-') {
 				runningTotal+=val;
-				printf("(0.5) Adding %f to %f\n",val,runningTotal);
+				//printf("(0.5) Adding %f to %f\n",val,runningTotal);
 				continue;
 			}
 
@@ -280,7 +280,7 @@ float equationToFloat(Str equation) {
 				} else {
 					runningTotal += (val * base);
 				}
-				printf("(1) Total: %f\n",runningTotal);
+				//printf("(1) Total: %f\n",runningTotal);
 				continue;
 			}
 
@@ -288,7 +288,7 @@ float equationToFloat(Str equation) {
 			if (CharItr_peek(&itr) == '+') {
 				CharItr_next(&itr); /* Pull the literal + */
 				runningTotal += val;
-				printf("(2) Adding %f to %f\n",val,runningTotal);
+				//printf("(2) Adding %f to %f\n",val,runningTotal);
 				continue;
 			}
 		}
@@ -304,7 +304,7 @@ float equationToFloat(Str equation) {
 			/* Check for exponent */
 			if (CharItr_peek(&itr) == '^') {
 				runningTotal += parseExponent(&itr, parenVal);
-				printf("(3) Total:  %f\n",runningTotal);
+				//printf("(3) Total:  %f\n",runningTotal);
 			} else {
 				runningTotal += parenVal;
 			}
@@ -324,7 +324,7 @@ float equationToFloat(Str equation) {
 				float initialVal = parseNum(&itr);
 				if (!CharItr_has_next(&itr)) {
 					runningTotal -= initialVal;
-					printf("(19) Subtracted c, now have %f\n", runningTotal);
+					//printf("(19) Subtracted c, now have %f\n", runningTotal);
 					return runningTotal;
 				}
 				if (CharItr_peek(&itr) != '*') {
@@ -332,7 +332,7 @@ float equationToFloat(Str equation) {
 						printf("(66) ERROR\n");
 					} else {
 						runningTotal -= initialVal;
-						printf("(-19) Subtracted c, now have %f\n", runningTotal);
+						//printf("(-19) Subtracted c, now have %f\n", runningTotal);
 						continue;
 					}
 				}
@@ -342,17 +342,17 @@ float equationToFloat(Str equation) {
 					/* Check if nextNum has an exponent */
 					if (!CharItr_has_next(&itr)) {
 						runningTotal -= (initialVal*nextNum);
-						printf("(28) Subtracted now at %f\n", runningTotal);
+						//printf("(28) Subtracted now at %f\n", runningTotal);
 						continue;
 					}
 					if (CharItr_peek(&itr) == '^') {
 						float secondProd = parseExponent(&itr, nextNum);
 						runningTotal -= (initialVal*secondProd);
-						printf("(29) Subtracted now at %f\n", runningTotal);
+						//printf("(29) Subtracted now at %f\n", runningTotal);
 						continue;
 					} else {
 						runningTotal -= (initialVal*nextNum);
-						printf("(30) Subtracted now at %f\n", runningTotal);
+						//printf("(30) Subtracted now at %f\n", runningTotal);
 						/* Some basic error checking */
 						if (!(CharItr_peek(&itr) == '+' || CharItr_peek(&itr) == '-')) {
 							printf("(31) Error\n");
@@ -373,13 +373,13 @@ float equationToFloat(Str equation) {
 				if (CharItr_peek(&itr) == '+' || CharItr_peek(&itr) == '-') {
 					/* Then we have a case 2 */
 					runningTotal-=initialVal;
-					printf("(20) Subtracting %f with new total %f\n", initialVal, runningTotal);
+					//printf("(20) Subtracting %f with new total %f\n", initialVal, runningTotal);
 					continue;
 				}
 				/* Check for case 3 */
 				if (CharItr_peek(&itr) == '^') {
 					runningTotal -= parseExponent(&itr, initialVal);
-					printf("(21) Subtracted exp prod now at %f\n", runningTotal);
+					//printf("(21) Subtracted exp prod now at %f\n", runningTotal);
 					continue;
 				}
 				/* Check for Cases 4 and 5 */
@@ -391,17 +391,17 @@ float equationToFloat(Str equation) {
 					/* Check if nextNum has an exponent */
 					if (!CharItr_has_next(&itr)) {
 						runningTotal -= (initialVal*nextNum);
-						printf("(22) Subtracted now at %f\n", runningTotal);
+						//printf("(22) Subtracted now at %f\n", runningTotal);
 						continue;
 					}
 					if (CharItr_peek(&itr) == '^') {
 						float secondProd = parseExponent(&itr, nextNum);
 						runningTotal -= (initialVal*secondProd);
-						printf("(23) Subtracted now at %f\n", runningTotal);
+						//printf("(23) Subtracted now at %f\n", runningTotal);
 						continue;
 					} else {
 						runningTotal -= (initialVal*nextNum);
-						printf("(24) Subtracted now at %f\n", runningTotal);
+						//printf("(24) Subtracted now at %f\n", runningTotal);
 						/* Some basic error checking */
 						if (!(CharItr_peek(&itr) == '+' || CharItr_peek(&itr) == '-')) {
 							printf("(11) Error\n");
@@ -410,12 +410,9 @@ float equationToFloat(Str equation) {
 					}
 				}
 			} else {
-				printf("NOT EXPECTING %c", CharItr_peek(&itr));
+				printf("(55) Error: Unexpected: %c", CharItr_peek(&itr));
 			}
-			//printf("Shold\n");
 		}
-
-			//printf("2Shold\n");
 	}
 	return runningTotal;
 }

@@ -13,7 +13,7 @@ Alternatively, a Makefile has been provided. Use `make all` to compile the sourc
 
 If you have any issues, then `make clean` will remove all build files.
 
-### Future Goals
+## Future Goals
 This implementation is by no means the most efficient means of numerical integration. That being said, there are some steps that I would like to take in the future to increase the efficiency of this program. 
 * Add support for more equations: logs, exponentials, trig functions, etc.
 * Make the EquationValue use a recursive descent parser to improve readability of the implementation
